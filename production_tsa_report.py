@@ -21,6 +21,7 @@ import logging
 from pathlib import Path
 from tsa_scraper import TSAPassengerVolumeScraper
 from dotenv import load_dotenv
+import pytz  # Add this import at the top with other imports
 
 # Load environment variables
 load_dotenv()
@@ -354,32 +355,24 @@ class ProductionTSAReporter:
             logger.error(f"Error in daily report generation: {e}")
             return False
 
-def schedule_weekday_reports():
-    """Schedule the daily report to run every weekday at 9:05 AM Eastern."""
-    reporter = ProductionTSAReporter()
-    
-    # Schedule for every weekday (Monday-Friday) at 9:05 AM
-    schedule.every().monday.at("09:05").do(reporter.run_daily_report)
-    schedule.every().tuesday.at("09:05").do(reporter.run_daily_report)
-    schedule.every().wednesday.at("09:05").do(reporter.run_daily_report)
-    schedule.every().thursday.at("09:05").do(reporter.run_daily_report)
-    schedule.every().friday.at("09:05").do(reporter.run_daily_report)
-    
-    logger.info("Production TSA report scheduled for weekdays at 9:05 AM Eastern time")
-    logger.info("Press Ctrl+C to stop the scheduler")
-    
-    try:
-        while True:
-            schedule.run_pending()
-            time.sleep(60)  # Check every minute
-    except KeyboardInterrupt:
-        logger.info("Scheduler stopped by user")
+def wait_until_next_905am_eastern():
+    EASTERN = pytz.timezone('US/Eastern')
+    now_utc = datetime.now(pytz.utc)
+    now_et = now_utc.astimezone(EASTERN)
+    # Find next weekday 9:05 AM ET
+    next_run = now_et.replace(hour=9, minute=5, second=0, microsecond=0)
+    if now_et >= next_run or now_et.weekday() >= 5:  # If past 9:05 or weekend
+        # Move to next weekday
+        days_ahead = 1
+        while (now_et + timedelta(days=days_ahead)).weekday() >= 5:
+            days_ahead += 1
+        next_run = (now_et + timedelta(days=days_ahead)).replace(hour=9, minute=5, second=0, microsecond=0)
+    wait_seconds = (next_run - now_et).total_seconds()
+    logger.info(f"Waiting {wait_seconds/60:.1f} minutes until next 9:05 AM ET ({next_run.strftime('%Y-%m-%d %H:%M:%S')})")
+    time.sleep(wait_seconds)
 
 if __name__ == "__main__":
-    # For testing, you can run the report immediately
-    if len(os.sys.argv) > 1 and os.sys.argv[1] == "--test":
-        reporter = ProductionTSAReporter()
-        reporter.run_daily_report()
-    else:
-        # Run the scheduler
-        schedule_weekday_reports() 
+    reporter = ProductionTSAReporter()
+    while True:
+        wait_until_next_905am_eastern()
+        reporter.run_daily_report() 
