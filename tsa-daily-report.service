@@ -1,0 +1,15 @@
+[Unit]
+Description=TSA Daily Passenger Volume Report
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+WorkingDirectory=/path/to/rivermont_capital_project
+Environment=PATH=/path/to/rivermont_capital_project/venv/bin
+ExecStart=/path/to/rivermont_capital_project/venv/bin/python /path/to/rivermont_capital_project/daily_tsa_report.py
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target 

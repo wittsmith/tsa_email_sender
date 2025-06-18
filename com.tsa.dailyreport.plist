@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.tsa.dailyreport</string>
+    
+    <key>ProgramArguments</key>
+    <array>
+        <string>/path/to/rivermont_capital_project/venv/bin/python</string>
+        <string>/path/to/rivermont_capital_project/daily_tsa_report.py</string>
+    </array>
+    
+    <key>WorkingDirectory</key>
+    <string>/path/to/rivermont_capital_project</string>
+    
+    <key>RunAtLoad</key>
+    <true/>
+    
+    <key>KeepAlive</key>
+    <true/>
+    
+    <key>StandardOutPath</key>
+    <string>/path/to/rivermont_capital_project/tsa_daily_report.log</string>
+    
+    <key>StandardErrorPath</key>
+    <string>/path/to/rivermont_capital_project/tsa_daily_report.log</string>
+    
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/path/to/rivermont_capital_project/venv/bin:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+</dict>
+</plist> 
